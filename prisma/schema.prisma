@@ -1,0 +1,48 @@
+// Prisma schema for the Appointment Booking API.
+// PostgreSQL data source. UUIDs and timestamptz everywhere.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Fixed appointment slot. Seeded by `prisma/seed.ts`.
+/// A slot is "available" iff there is no Booking row with status = 'active'
+/// pointing at it (enforced by a partial unique index in the migration).
+model Slot {
+  id       String    @id @default(uuid()) @db.Uuid
+  startsAt DateTime  @map("starts_at") @db.Timestamptz(6)
+  endsAt   DateTime  @map("ends_at") @db.Timestamptz(6)
+  bookings Booking[]
+
+  @@index([startsAt, id])
+  @@map("slots")
+}
+
+/// Booking for a slot. status = 'active' means the slot is taken.
+/// Cancelled bookings remain in the table (history) and never block rebooking.
+model Booking {
+  id           String        @id @default(uuid()) @db.Uuid
+  slotId       String        @map("slot_id") @db.Uuid
+  customerName String        @map("customer_name")
+  customerEmail String       @map("customer_email")
+  status       BookingStatus @default(active)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  slot Slot @relation(fields: [slotId], references: [id])
+
+  @@index([slotId])
+  @@index([slotId, status])
+  @@map("bookings")
+}
+
+enum BookingStatus {
+  active
+  cancelled
+
+  @@map("booking_status")
+}
