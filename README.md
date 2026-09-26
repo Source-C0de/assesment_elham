@@ -1,7 +1,7 @@
 # Appointment Booking API
 
 A standalone NestJS + Prisma + PostgreSQL + Socket.IO backend for booking
-fixed appointment slots. Built as a recruitment exercise.
+fixed appointment slots. Built as a recruitment exercise and other stuffs.
 
 - **Stack**: TypeScript, NestJS, Express (under the hood), PostgreSQL,
   Prisma ORM, Socket.IO, `@nestjs/swagger` (Swagger UI).
